@@ -1,0 +1,205 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #825a6d;
+  --ink: #161616;
+  --surface: #282826;
+  --muted: #d4d4d4;
+  --line: #a4a3a1;
+}
+
+html {
+  background-color: var(--ink);
+}
+
+body {
+  min-height: 100vh;
+  background: transparent;
+}
+
+::selection {
+  background: var(--primary);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ink);
+}
+::-webkit-scrollbar-thumb {
+  background: #3a3a38;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ---------- decorative backdrop ---------- */
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(164, 163, 161, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(164, 163, 161, 0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 25%, transparent 78%);
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 25%, transparent 78%);
+}
+
+.wave {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  height: auto;
+}
+
+.wave-b {
+  bottom: 4%;
+  opacity: 0.09;
+  animation: drift 40s linear infinite reverse;
+}
+
+.floaty {
+  animation: floaty 8s ease-in-out infinite;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -14px;
+  border-radius: 2px;
+  opacity: 0.95;
+  animation-name: confetti-fall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes confetti-fall {
+  to {
+    transform: translateY(106vh) rotate(680deg);
+    opacity: 0.85;
+  }
+}
+
+/* ---------- finish splash ---------- */
+
+.splash-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(22, 22, 22, 0.93);
+  backdrop-filter: blur(8px);
+  transition: opacity 0.45s ease;
+}
+
+.splash-fadeout {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-letter {
+  font-size: clamp(64px, 15vw, 180px);
+  font-weight: 800;
+  line-height: 1;
+  color: #ffffff;
+  opacity: 0;
+  animation: splash-pop 0.5s cubic-bezier(0.2, 1.4, 0.3, 1) forwards;
+  text-shadow:
+    0 0 42px rgba(130, 90, 109, 0.95),
+    0 0 110px rgba(156, 117, 137, 0.5);
+}
+
+.splash-sub {
+  font-size: 13px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #9c7589;
+  opacity: 0;
+  animation: splash-sub-in 0.6s 0.75s ease forwards;
+}
+
+@keyframes splash-pop {
+  from {
+    opacity: 0;
+    transform: translateY(46px) scale(0.55) rotate(9deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes splash-sub-in {
+  to {
+    opacity: 0.95;
+  }
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translateY(-18px) rotate(var(--r, 0deg));
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave-b,
+  .floaty,
+  .confetti-piece {
+    animation: none;
+    opacity: 0;
+  }
+
+  .splash-letter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .splash-sub {
+    animation: none;
+    opacity: 0.95;
+  }
+
+  .splash-wrap {
+    transition: none;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-line/30 bg-transparent px-5 py-3 text-sm font-semibold text-muted transition hover:border-line hover:text-white disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .card {
+    @apply rounded-2xl border border-line/15 bg-surface/90 p-6 shadow-lg shadow-black/30 backdrop-blur-sm;
+  }
+  .input {
+    @apply w-full rounded-xl border border-line/25 bg-ink px-4 py-3 text-sm text-white placeholder:text-line/60 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line/20 bg-ink px-3 py-1 text-xs text-muted;
+  }
+}

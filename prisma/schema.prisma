@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Quiz {
+  id           String        @id @default(cuid())
+  title        String
+  code         String        @unique
+  hostToken    String        @unique
+  hostName     String
+  questions    Question[]
+  participants Participant[]
+  isActive     Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+}
+
+model Question {
+  id           String @id @default(cuid())
+  quizId       String
+  quiz         Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  text         String
+  options      String[]
+  correctIndex Int
+  timer        Int
+  order        Int
+}
+
+model Participant {
+  id        String   @id @default(cuid())
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  name      String
+  score     Int      @default(0)
+  answers   Json     @default("{}")
+  socketId  String?
+  createdAt DateTime @default(now())
+
+  @@index([quizId])
+}
