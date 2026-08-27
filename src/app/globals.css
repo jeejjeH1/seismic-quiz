@@ -67,6 +67,21 @@ body {
   animation: floaty 8s ease-in-out infinite;
 }
 
+.double-line > svg,
+.double-line {
+  animation: line-pulse 3.2s ease-in-out infinite;
+}
+
+@keyframes line-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 .confetti-piece {
   position: absolute;
   top: -14px;

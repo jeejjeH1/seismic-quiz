@@ -19,9 +19,40 @@ function OptionTile({
         {letter}
       </span>
       <span className="flex flex-col gap-1.5">
-        <span className="block h-2 w-24 rounded bg-line/25" />
-        <span className="block h-2 w-16 rounded bg-line/15" />
+        <span className="double-line block h-2 w-24 rounded bg-line/25" />
+        <span className="double-line block h-2 w-16 rounded bg-line/15" />
       </span>
+    </div>
+  );
+}
+
+function PodiumMini() {
+  return (
+    <div className="absolute bottom-[14%] right-[10%] hidden flex-row items-end gap-2 opacity-[0.14] xl:flex">
+      {[
+        { h: "h-16", label: "2" },
+        { h: "h-24", label: "1" },
+        { h: "h-12", label: "3" },
+      ].map((c, i) => (
+        <div key={i} className="flex flex-col items-center gap-1">
+          <span className="text-xs font-bold text-primary-light">{c.label}</span>
+          <div className={`w-10 rounded-t-lg bg-gradient-to-t from-primary/60 to-primary-light/70 ${c.h}`} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function BarChartMini() {
+  return (
+    <div className="absolute left-[4%] bottom-[24%] hidden flex-row items-end gap-2.5 opacity-[0.12] lg:flex">
+      {[46, 74, 30, 58].map((h, i) => (
+        <div
+          key={i}
+          className="w-6 rounded-t-md bg-gradient-to-t from-primary/40 to-primary-light/50"
+          style={{ height: `${h}px` }}
+        />
+      ))}
     </div>
   );
 }
@@ -36,20 +67,17 @@ export default function Backdrop() {
       <div className="absolute bottom-[-18%] left-[-10%] h-[560px] w-[560px] rounded-full bg-primary-light/15 blur-[170px]" />
       <div className="absolute left-[30%] top-[35%] h-[300px] w-[300px] rounded-full bg-primary/10 blur-[120px]" />
 
-      {/* giant question marks */}
-      <span className="absolute -right-6 top-[6%] select-none font-sans text-[260px] font-extrabold leading-none text-primary/10">
+      {/* giant "?" — quiz core symbol */}
+      <span className="absolute -right-6 top-[4%] select-none font-sans text-[280px] font-extrabold leading-none text-primary/12">
         ?
       </span>
-      <span className="absolute left-[3%] top-[52%] rotate-[-14deg] select-none font-sans text-[190px] font-extrabold leading-none text-primary-light/[0.07]">
-        ?
-      </span>
-      <span className="absolute bottom-[-8%] right-[28%] rotate-[10deg] select-none font-sans text-[150px] font-extrabold leading-none text-line/[0.06]">
+      <span className="absolute left-[2%] top-[46%] rotate-[-14deg] select-none font-sans text-[190px] font-extrabold leading-none text-primary-light/[0.07]">
         ?
       </span>
 
       {/* countdown ring */}
       <svg
-        className="floaty absolute left-[6%] top-[8%] h-44 w-44 opacity-[0.08]"
+        className="floaty absolute left-[6%] top-[8%] h-44 w-44 opacity-[0.09]"
         viewBox="0 0 100 100"
         style={{ ["--r" as string]: "-6deg" }}
       >
@@ -61,23 +89,29 @@ export default function Backdrop() {
       <OptionTile
         letter="A"
         className="floaty hidden lg:flex"
-        style={{ top: "18%", left: "12%", "--r": "-5deg", animationDelay: "0s" } as React.CSSProperties}
+        style={{ top: "20%", left: "13%", "--r": "-5deg", animationDelay: "0s" } as React.CSSProperties}
       />
       <OptionTile
         letter="B"
         className="floaty hidden xl:flex"
-        style={{ top: "68%", right: "7%", "--r": "4deg", animationDelay: "1.6s" } as React.CSSProperties}
+        style={{ top: "62%", right: "7%", "--r": "4deg", animationDelay: "1.6s" } as React.CSSProperties}
       />
       <OptionTile
         letter="C"
         className="floaty hidden xl:flex"
-        style={{ top: "38%", right: "16%", "--r": "-3deg", animationDelay: "3.1s" } as React.CSSProperties}
+        style={{ top: "36%", right: "17%", "--r": "-3deg", animationDelay: "3.1s" } as React.CSSProperties}
       />
       <OptionTile
         letter="D"
         className="floaty hidden lg:flex"
-        style={{ bottom: "10%", left: "20%", "--r": "6deg", animationDelay: "2.2s" } as React.CSSProperties}
+        style={{ bottom: "9%", left: "22%", "--r": "6deg", animationDelay: "2.2s" } as React.CSSProperties}
       />
+
+      {/* mini leaderboard podium */}
+      <PodiumMini />
+
+      {/* mini answer distribution chart */}
+      <BarChartMini />
 
       {/* seismic underline (brand nod) */}
       <svg
