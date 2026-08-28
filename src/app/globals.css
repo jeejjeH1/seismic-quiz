@@ -82,6 +82,145 @@ body {
   }
 }
 
+/* ---------- quiz backdrop animations ---------- */
+
+.sonar {
+  position: absolute;
+  border-radius: 9999px;
+  border: 2px solid rgba(156, 117, 137, 0.4);
+  animation: sonar 4.5s ease-out infinite;
+}
+
+@keyframes sonar {
+  0% {
+    transform: scale(0.3);
+    opacity: 0.65;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+.score-pop {
+  position: absolute;
+  font-weight: 800;
+  color: #b08ca0;
+  text-shadow: 0 0 26px rgba(156, 117, 137, 0.65);
+  opacity: 0;
+  animation: score-float 7s ease-in-out infinite;
+  white-space: nowrap;
+}
+
+@keyframes score-float {
+  0% {
+    transform: translateY(34px) scale(0.8);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.5;
+  }
+  60% {
+    opacity: 0.32;
+  }
+  100% {
+    transform: translateY(-96px) scale(1.06);
+    opacity: 0;
+  }
+}
+
+.sweep-ring {
+  animation: sweep 9s linear infinite;
+}
+
+@keyframes sweep {
+  from {
+    stroke-dashoffset: 264;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.drift-dot {
+  position: absolute;
+  border-radius: 9999px;
+  opacity: 0;
+  animation: drift-x 16s linear infinite;
+}
+
+@keyframes drift-x {
+  0% {
+    transform: translateX(-10vw);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateX(110vw);
+    opacity: 0;
+  }
+}
+
+/* ---------- question card animations ---------- */
+
+.opt-in {
+  animation: opt-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.15) backwards;
+}
+
+@keyframes opt-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+}
+
+.correct-pop {
+  animation: correct-pop 0.5s cubic-bezier(0.2, 1.6, 0.3, 1);
+}
+
+@keyframes correct-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.045);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.correct-glow {
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, 0.45),
+    0 0 26px rgba(16, 185, 129, 0.28);
+}
+
+.wrong-shake {
+  animation: wrong-shake 0.4s ease;
+}
+
+@keyframes wrong-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+}
+
 .confetti-piece {
   position: absolute;
   top: -14px;
@@ -180,9 +319,17 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .wave-b,
   .floaty,
-  .confetti-piece {
+  .confetti-piece,
+  .sonar,
+  .score-pop,
+  .sweep-ring,
+  .drift-dot,
+  .opt-in,
+  .correct-pop,
+  .wrong-shake,
+  .double-line {
     animation: none;
-    opacity: 0;
+    opacity: 0.35;
   }
 
   .splash-letter {

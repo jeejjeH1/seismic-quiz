@@ -331,14 +331,39 @@ export default function PlayerRoom({ code }: { code: string }) {
             resetKey={`${question.index}-${question.deadline}`}
           />
           <section className="animate-pop">
-          <div className="card mb-4 flex items-start justify-between gap-4">
-            <div>
-              <p className="mb-2 text-xs text-line">
-                Question {fmt(question.index + 1)} of {fmt(question.total)}
-              </p>
-              <h2 className="text-lg font-extrabold leading-8">{question.text}</h2>
+          <div className="card relative mb-4 overflow-hidden p-0">
+            <div className="h-1.5 w-full bg-gradient-to-r from-primary via-[#B08CA0] to-primary-light" />
+            <div className="flex items-start justify-between gap-4 p-6">
+              <div className="min-w-0">
+                <div className="mb-3 flex items-center gap-2">
+                  <span
+                    className="grid h-8 min-w-8 place-items-center rounded-lg px-2 text-xs font-extrabold text-white"
+                    style={{ backgroundColor: OPTION_COLORS[question.index % 4] }}
+                  >
+                    Q{fmt(question.index + 1)}
+                  </span>
+                  <span className="text-xs text-line">of {fmt(question.total)}</span>
+                  {phase === "reveal" && chosen !== null && (
+                    <span
+                      className={`ml-1 rounded-full px-2.5 py-0.5 text-[11px] font-extrabold ${
+                        chosen === correctIndex
+                          ? "bg-emerald-500/20 text-emerald-300"
+                          : "bg-red-500/20 text-red-300"
+                      }`}
+                    >
+                      {chosen === correctIndex ? "Correct!" : "Wrong"}
+                    </span>
+                  )}
+                </div>
+                <h2
+                  key={question.index}
+                  className="animate-fadeIn text-lg font-extrabold leading-8"
+                >
+                  {question.text}
+                </h2>
+              </div>
+              <CountdownRing deadline={question.deadline} timer={question.timer} />
             </div>
-            <CountdownRing deadline={question.deadline} timer={question.timer} />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -346,26 +371,36 @@ export default function PlayerRoom({ code }: { code: string }) {
               const isChosen = chosen === i;
               const isCorrect = phase === "reveal" && i === correctIndex;
               const revealed = phase === "reveal";
+              const state = isCorrect
+                ? "correct"
+                : revealed && isChosen
+                ? "wrong"
+                : revealed
+                ? "dim"
+                : isChosen
+                ? "chosen"
+                : "idle";
               return (
                 <button
-                  key={i}
+                  key={`${question.index}-${i}`}
                   onClick={() => pickOption(i)}
                   disabled={revealed || chosen !== null}
-                  className={`flex touch-manipulation items-center gap-3 rounded-xl border px-4 py-5 text-left text-base transition-all ${
-                    isCorrect
-                      ? "border-emerald-500 bg-emerald-500/15 font-bold"
-                      : revealed && isChosen
-                      ? "border-red-500 bg-red-500/15 opacity-80"
-                      : revealed
+                  style={{ animationDelay: `${i * 70}ms` }}
+                  className={`opt-in flex touch-manipulation items-center gap-3 rounded-xl border px-4 py-5 text-left text-base transition-all ${
+                    state === "correct"
+                      ? "correct-pop correct-glow border-emerald-500 bg-emerald-500/15 font-bold"
+                      : state === "wrong"
+                      ? "wrong-shake border-red-500 bg-red-500/15 opacity-80"
+                      : state === "dim"
                       ? "border-line/15 bg-surface opacity-50"
-                      : isChosen
+                      : state === "chosen"
                       ? "scale-[0.98] border-primary bg-primary/20 ring-2 ring-white/60"
-                      : "border-line/20 bg-surface transition hover:border-primary hover:bg-primary/10 active:scale-[0.97]"
+                      : "border-line/20 bg-surface transition hover:border-primary hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/10 active:scale-[0.97]"
                   }`}
                 >
                   <span
-                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg text-sm font-extrabold text-white ${
-                      isCorrect ? "bg-emerald-500" : ""
+                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg text-sm font-extrabold text-white transition-transform ${
+                      isCorrect ? "scale-110 bg-emerald-500" : ""
                     }`}
                     style={
                       isCorrect

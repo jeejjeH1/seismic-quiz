@@ -57,6 +57,68 @@ function BarChartMini() {
   );
 }
 
+function Sonar({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <>
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className={`sonar ${className ?? ""}`}
+          style={{ ...style, animationDelay: `${i * 1.5}s`, width: 220, height: 220 }}
+        />
+      ))}
+    </>
+  );
+}
+
+function ScorePops() {
+  const pops = [
+    { text: "+850", left: "16%", bottom: "26%", delay: "0s" },
+    { text: "+1000", left: "70%", bottom: "18%", delay: "2.4s" },
+    { text: "+640", left: "38%", bottom: "12%", delay: "4.8s" },
+    { text: "+1000", left: "86%", bottom: "30%", delay: "1.2s" },
+  ];
+  return (
+    <>
+      {pops.map((p, i) => (
+        <span
+          key={i}
+          className="score-pop text-xl"
+          style={{ left: p.left, bottom: p.bottom, animationDelay: p.delay }}
+        >
+          {p.text}
+        </span>
+      ))}
+    </>
+  );
+}
+
+function DriftDots() {
+  const dots = [
+    { top: "22%", size: 7, delay: "0s", dur: "15s" },
+    { top: "48%", size: 5, delay: "4s", dur: "19s" },
+    { top: "72%", size: 8, delay: "8s", dur: "17s" },
+    { top: "34%", size: 4, delay: "11s", dur: "21s" },
+  ];
+  return (
+    <>
+      {dots.map((d, i) => (
+        <span
+          key={i}
+          className="drift-dot bg-primary-light/60"
+          style={{
+            top: d.top,
+            width: d.size,
+            height: d.size,
+            animationDelay: d.delay,
+            animationDuration: d.dur,
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
 export default function Backdrop() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -75,14 +137,34 @@ export default function Backdrop() {
         ?
       </span>
 
-      {/* countdown ring */}
+      {/* sonar pulses — seismic radar */}
+      <Sonar className="hidden md:block" style={{ left: "8%", top: "58%" }} />
+
+      {/* floating score pops */}
+      <ScorePops />
+
+      {/* drifting light dots */}
+      <DriftDots />
+
+      {/* sweeping countdown ring */}
       <svg
-        className="floaty absolute left-[6%] top-[8%] h-44 w-44 opacity-[0.09]"
+        className="floaty absolute left-[6%] top-[8%] h-44 w-44 opacity-[0.1]"
         viewBox="0 0 100 100"
         style={{ ["--r" as string]: "-6deg" }}
       >
         <circle cx="50" cy="50" r="42" fill="none" stroke="#9C7589" strokeWidth="7" strokeDasharray="200 64" strokeLinecap="round" />
-        <circle cx="50" cy="50" r="30" fill="none" stroke="#A4A3A1" strokeWidth="2" strokeDasharray="4 10" />
+        <circle
+          className="sweep-ring"
+          cx="50"
+          cy="50"
+          r="30"
+          fill="none"
+          stroke="#B08CA0"
+          strokeWidth="3"
+          strokeDasharray="264"
+          strokeLinecap="round"
+          transform="rotate(-90 50 50)"
+        />
       </svg>
 
       {/* floating answer tiles */}
