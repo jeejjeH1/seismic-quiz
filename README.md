@@ -1,138 +1,141 @@
 # Seismic Quiz
 
-پلتفرم برگزاری مسابقه کوئیز به‌صورت **بی‌درنگ (Real-time)** — طراحی سوال توسط میزبان، ورود بازیکنان با کد ۶ رقمی و لیدربرد زنده پس از هر سوال.
+A **real-time** quiz platform — hosts build quizzes, players join with a 6-digit room code, and a live leaderboard updates after every question.
 
-## پشته فناوری
+## Live
 
-| بخش | تکنولوژی | استقرار |
-|---|---|---|
-| فرانت‌اند | Next.js 14 (App Router) + TypeScript | Vercel |
-| سرور سوکت | Express + Socket.IO (`backend/`) | Render |
-| دیتابیس | PostgreSQL + Prisma ORM | Supabase |
-| کش / لیدربرد | Redis | Upstash |
-| احراز هویت میزبان | NextAuth.js (Credentials + JWT، رمز با scrypt) | — |
-
-معماری دو بخشی است:
-- **فرانت** (`/` ریشه): صفحات + API Routes (احراز هویت و CRUD کوئیز) — فقط به Supabase وصل است
-- **بک‌اند سوکت** (`backend/`): موتور بازی realtime — به Supabase + Upstash وصل است و CORS آن با `CORS_ORIGIN` کنترل می‌شود
-
-## هویت بصری
-
-| کاربرد | رنگ |
+| Service | URL |
 |---|---|
-| اصلی (Primary) | `#825A6D` |
-| پس‌زمینه اصلی | `#161616` |
-| پس‌زمینه ثانویه | `#282826` |
-| متن توضیحات | `#D4D4D4` |
-| خطوط جداکننده | `#A4A3A1` |
+| Website | http://seismic-quiz.duckdns.org |
+| Socket server | same domain, `/socket.io/` path |
 
-فونت: Vazirmatn (فارسی) + Inter — حالت مینیمال با کنتراست بالا.
+Self-hosted on a single Ubuntu server: **Nginx** (reverse proxy + WebSocket) → **Next.js** (port 3000) + **Socket.IO** (port 4000), managed by **PM2**, with local **PostgreSQL** and **Redis**. No third-party cloud services required.
 
-## پیش‌نیازها (اجرای محلی)
+## Tech Stack
 
-- Node.js ≥ 18
-- PostgreSQL و Redis در حال اجرا (یا Docker):
-  ```bash
-  docker run -d --name sq-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=seismic_quiz -p 5432:5432 postgres:16
-  docker run -d --name sq-redis -p 6379:6379 redis:7
-  ```
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 14 (App Router) + TypeScript + Tailwind |
+| Realtime engine | Express + Socket.IO (`backend/`) |
+| Database | PostgreSQL + Prisma ORM |
+| Live leaderboard / rooms | Redis (Sorted Sets) |
+| Process manager | PM2 (auto-restart + boot persistence) |
+| Reverse proxy | Nginx (HTTP + WebSocket upgrade) |
 
-## راه‌اندازی محلی
+## Architecture
+
+Two independent processes share one PostgreSQL database:
+
+- **Frontend** (repo root): pages + API routes (quiz CRUD, CSV export) — talks to PostgreSQL only
+- **Socket backend** (`backend/`): the real-time game engine (state machine, scoring, room sync) — talks to PostgreSQL + Redis; CORS controlled via `CORS_ORIGIN`
+
+## Visual Identity
+
+| Usage | Color |
+|---|---|
+| Primary | `#825A6D` |
+| Background | `#161616` |
+| Surface | `#282826` |
+| Muted text | `#D4D4D4` |
+| Lines | `#A4A3A1` |
+
+Font: Inter. Minimal dark theme, high contrast, quiz-themed animated backdrop (floating A/B/C/D tiles, podium, distribution chart, countdown ring, seismic wave).
+
+## Local Development
+
+Prerequisites: Node.js ≥ 18, PostgreSQL and Redis running (or Docker):
 
 ```bash
-npm install                 # فرانت + prisma generate
-cd backend && npm install && cd ..   # بک‌اند سوکت
-npx prisma migrate dev --name init   # از ریشه — schema اصلی در /prisma است
-npm run dev:all             # فرانت :3000 + سوکت :4000 با هم
+docker run -d --name sq-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=seismic_quiz -p 5432:5432 postgres:16
+docker run -d --name sq-redis -p 6379:6379 redis:7
 ```
 
-سپس `http://localhost:3000` را باز کنید.
+```bash
+npm install                          # frontend + prisma generate
+cd backend && npm install && cd ..   # socket backend
+npx prisma db push                   # from repo root — schema lives in /prisma
+npm run dev:all                      # frontend :3000 + socket :4000 together
+```
 
-### متغیرهای محیطی
+Open `http://localhost:3000`.
 
-**ریشه (`.env`):**
+### Environment Variables
+
+**Root (`.env`):**
 ```
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/seismic_quiz?schema=public"
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="..."
-NEXT_PUBLIC_SOCKET_URL="http://localhost:4000"
+NEXT_PUBLIC_SOCKET_URL="http://localhost:4000"   # or "" for same-origin behind a proxy
 ```
 
-**بک‌اند (`backend/.env`)** — نمونه در `backend/.env.example`:
+**Socket backend (`backend/.env`):**
 ```
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/seismic_quiz?schema=public"
 REDIS_URL="redis://localhost:6379"
 CORS_ORIGIN="http://localhost:3000"
 ```
 
-> نکته: `prisma generate` بک‌اند به schema ریشه (`../prisma/schema.prisma`) اشاره می‌کند؛ پس backend باید داخل همین مخزن نصب شود. Migration فقط از ریشه اجرا می‌شود.
+> Note: the backend's `prisma generate` points at the root schema (`../prisma/schema.prisma`) — keep `backend/` inside this repo.
 
-## استقرار ابری (رایگان)
+## Server Deployment (single box)
 
-### ۱) Supabase (دیتابیس)
-پروژه بسازید ← `Project Settings → Database → Connection string (URI)` را کپی کنید.
-- برای **Vercel**: پورت `6543` با `?pgbouncer=true`
-- برای **Render**: پورت `6543` هم کار می‌کند (Pooler)
+```bash
+# 1) install runtime
+apt install -y nodejs nginx redis-server postgresql
+npm i -g pm2
 
-### ۲) Upstash (Redis)
-دیتابیس رایگان بسازید ← مقدار `rediss://...` را کپی کنید (دو s = TLS).
+# 2) code + env
+git clone <repo> /root/seismic && cd /root/seismic
+# create .env and backend/.env (see above; use localhost URLs)
 
-### ۳) Render (سرور سوکت)
-1. ریپو را به GitHub پوش کنید
-2. Render ← New ← Blueprint ← ریپو را انتخاب کنید (`render.yaml` آماده است، Root Directory خودکار روی `backend` تنظیم می‌شود)
-3. متغیرها را پر کنید:
-   - `DATABASE_URL` ← آدرس Supabase
-   - `REDIS_URL` ← آدرس Upstash (`rediss://`)
-   - `CORS_ORIGIN` ← فعلاً `*` (بعداً دامنه Vercel را بگذارید)
-4. دامنه‌ای مثل `https://seismic-quiz-socket.onrender.com` می‌گیرید
+# 3) database
+npx prisma generate && npx prisma db push
 
-> ⚠️ پلن رایگان Render بعد از ~۱۵ دقیقه بی‌کاری خاموش می‌شود؛ اولین ورود ~۳۰ ثانیه طول می‌کشد. برای مسابقه زنده، چند لحظه قبل سرویس را باز کنید تا گرم شود.
+# 4) frontend production build
+npm run build
 
-### ۴) Vercel (فرانت)
-1. ریپو را Import کنید (ریشه مخزن، بدون تغییر Root Directory)
-2. متغیرها:
-   - `DATABASE_URL` ← Supabase (پورت 6543)
-   - `NEXTAUTH_URL` ← دامنه Vercel
-   - `NEXTAUTH_SECRET` ← رشته تصادفی بلند
-   - `NEXT_PUBLIC_SOCKET_URL` ← دامنه Render مرحله ۳
-3. Deploy
-4. برگردید به Render و `CORS_ORIGIN` را دقیقاً دامنه Vercel کنید (مثلاً `https://your-app.vercel.app`)
+# 5) processes
+pm2 start npm --name seismic-web -- start
+pm2 start backend/start-socket.sh --name seismic-socket
+pm2 save && pm2 startup
 
-## مسیرها
+# 6) nginx: reverse proxy / -> :3000, /socket.io/ -> :4000 (with WS upgrade)
+```
 
-| مسیر | نقش |
+## Routes
+
+| Route | Purpose |
 |---|---|
-| `/` | صفحه اصلی + ورود سریع با کد اتاق |
-| `/auth/signin` | ورود/ثبت‌نام میزبان |
-| `/dashboard` | لیست کوئیز‌ها + ساخت کوئیز جدید |
-| `/dashboard/[quizId]` | ادیتور سوالات (۴ گزینه‌ای + تایمر هر سوال + انتخاب پاسخ صحیح با کلیک) |
-| `/host/[code]` | اتاق کنترل زنده میزبان: شروع، نمایش پاسخ، سوال بعدی، آمار لحظه‌ای |
-| `/quiz/[code]` | سمت بازیکن: لابی ← سوال ← پاسخ ← نتایج |
-| `/leaderboard/[code]` | لیدربرد عمومی زنده (برای نمایش روی پروژکتور) |
+| `/` | Landing page + quick join by room code |
+| `/dashboard` | Host panel: quiz list + create quiz |
+| `/dashboard/[quizId]` | Question editor (4 options + per-question timer + correct answer picker) |
+| `/host/[code]` | Live host control room: start, reveal, next question, live stats, invite link, CSV export |
+| `/quiz/[code]` | Player flow: lobby → question → answer → results (color-coded options, timer bar, confetti) |
+| `/leaderboard/[code]` | Public live leaderboard (for projector display) |
 
-## رویدادهای Socket.IO
+## Socket.IO Events
 
-**کلاینت → سرور:** `join_room`, `watch_room`, `host_auth`, `submit_answer`, `host_start_quiz`, `host_reveal_answer`, `host_next_question`, `leaderboard_request`, `sync_request`
+**Client → Server:** `join_room`, `watch_room`, `host_auth`, `submit_answer`, `host_start_quiz`, `host_reveal_answer`, `host_next_question`, `leaderboard_request`, `sync_request`
 
-**سرور → کلاینت:** `new_question`, `show_correct_answer`, `leaderboard_update`, `players_update`, `stats_update`, `quiz_finished`
+**Server → Client:** `new_question`, `show_correct_answer`, `leaderboard_update`, `players_update`, `stats_update`, `quiz_finished`
 
-## منطق امتیازدهی
+## Scoring
 
-پاسخ صحیح = تا سقف `1000 × (زمانِ باقی‌مانده ÷ مدت سوال)` امتیاز؛ یعنی پاسخ سریع‌تر، امتیاز بیشتر. امتیازها ابتدا در Redis (Sorted Set) تجمیع و هم‌زمان در PostgreSQL ماندگار می‌شوند.
+Correct answer earns up to `1000 × (time remaining ÷ question duration)` points — faster answers score more. Scores accumulate in Redis (Sorted Set) and are persisted to PostgreSQL.
 
-## ساختار کلیدی
+## Project Structure
 
 ```
-server.mjs (ریشه)           ← حذف شده؛ سرور سوکت به backend منتقل شد
 backend/
-  server.mjs                سرور مستقل Express + Socket.IO (Render)
-  src/game-server.mjs       موتور بازی realtime (state machine + scoring)
-prisma/schema.prisma        مدل‌های User, Quiz, Question, Participant (مشترک)
-src/app/...                 صفحات و API Routes فرانت
-src/components/             Leaderboard (انیمیشن رتبه + مدال)، CountdownRing
-render.yaml                 بلوپرینت دیپلوی Render
+  server.mjs                standalone Express + Socket.IO server
+  src/game-server.mjs       realtime game engine (state machine + scoring + distribution)
+  start-socket.sh           PM2 entry (node --env-file=.env server.mjs)
+prisma/schema.prisma        Quiz, Question, Participant models (shared)
+src/app/...                 frontend pages + API routes
+src/components/             Leaderboard (rank animation + medals), CountdownRing, TimerBar, Backdrop
+render.yaml                 Render blueprint (optional cloud deploy)
+Dockerfile (backend/)       optional docker runtime
 ```
 
-## تست چندکاربره
+## Testing Multiplayer
 
-دو مرورگر (یا یک نرمال و یک ناشناس) باز کنید؛ یکی میزبان و بقیه بازیکن با کد اتاق.
+Open two browsers (or one normal + one incognito); one hosts, others join with the room code.
