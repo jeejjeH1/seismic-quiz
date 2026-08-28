@@ -5,20 +5,26 @@ import { useEffect, useState } from "react";
 export default function SplashWord({
   text = "GMIC",
   ms = 2000,
+  onDone,
 }: {
   text?: string;
   ms?: number;
+  onDone?: () => void;
 }) {
   const [fade, setFade] = useState(false);
   const [gone, setGone] = useState(false);
 
   useEffect(() => {
     const t1 = setTimeout(() => setFade(true), Math.max(0, ms - 450));
-    const t2 = setTimeout(() => setGone(true), ms);
+    const t2 = setTimeout(() => {
+      setGone(true);
+      onDone?.();
+    }, ms);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ms]);
 
   if (gone) return null;

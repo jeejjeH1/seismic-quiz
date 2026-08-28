@@ -19,17 +19,17 @@ export default function PublicLeaderboard({ code }: { code: string }) {
       setEntries(e);
       setOk(true);
     });
-    socket.emit(
-      "watch_room",
-      { code },
-      (res: { ok: boolean; title?: string }) => {
+    const watch = () =>
+      socket.emit("watch_room", { code }, (res: { ok: boolean; title?: string }) => {
         setOk(res.ok);
         if (res.title) setTitle(res.title);
-      }
-    );
+      });
+    watch();
     socket.emit("leaderboard_request");
+    socket.on("connect", watch);
     return () => {
       socket.off("leaderboard_update");
+      socket.off("connect", watch);
     };
   }, [code]);
 

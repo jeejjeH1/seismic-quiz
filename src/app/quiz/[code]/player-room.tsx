@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import CountdownRing from "@/components/CountdownRing";
 import TimerBar from "@/components/TimerBar";
@@ -17,6 +18,7 @@ const fmt = (n: number) => n.toLocaleString("en-US");
 type Phase = "join" | "lobby" | "question" | "reveal" | "finished";
 
 export default function PlayerRoom({ code }: { code: string }) {
+  const router = useRouter();
   const [phase, setPhase] = useState<Phase>("join");
   const [name, setName] = useState("");
   const [participantId, setParticipantId] = useState<string | null>(null);
@@ -136,6 +138,24 @@ export default function PlayerRoom({ code }: { code: string }) {
     },
     [code]
   );
+
+  // Re-join automatically after socket reconnects (no manual refresh needed)
+  useEffect(() => {
+    const socket = getSocket();
+    const onConnect = () => {
+      const pid = window.localStorage.getItem(`sq_pid_${code}`);
+      const nm = window.localStorage.getItem("sq_name");
+      if (pid && nm && participantId) {
+        socket.emit("join_room", { code, name: nm, participantId: pid }, (res: { ok: boolean }) => {
+          if (res.ok) socket.emit("sync_request");
+        });
+      }
+    };
+    socket.on("connect", onConnect);
+    return () => {
+      socket.off("connect", onConnect);
+    };
+  }, [code, participantId]);
 
   function pickOption(i: number) {
     if (phase !== "question" || chosen !== null || !question) return;
@@ -383,7 +403,7 @@ export default function PlayerRoom({ code }: { code: string }) {
 
       {phase === "finished" && (
         <section className="flex animate-fadeIn flex-col items-center gap-5">
-          <SplashWord text="GMIC" ms={2000} />
+          <SplashWord text="GMIC" ms={2000} onDone={() => router.push(`/leaderboard/${code}`)} />
           {me && me.rank <= 3 && <Confetti />}
           <div className="card w-full max-w-md text-center">
             <h2 className="text-2xl font-extrabold">Match finished</h2>

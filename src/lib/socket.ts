@@ -13,7 +13,15 @@ export function getSocket(): Socket {
   if (!window.__sqSocket) {
     const env = (process.env.NEXT_PUBLIC_SOCKET_URL || "").trim();
     const base = env || window.location.origin;
-    window.__sqSocket = io(base, { transports: ["websocket", "polling"] });
+    window.__sqSocket = io(base, {
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 3000,
+      timeout: 10000,
+    });
   }
   return window.__sqSocket;
 }
+

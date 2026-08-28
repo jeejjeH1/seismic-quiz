@@ -97,6 +97,22 @@ export default function HostRoom({
       }
     );
 
+    const onConnect = () => {
+      socket.emit(
+        "host_auth",
+        { code, hostToken },
+        (res: { ok: boolean; state?: { phase: Phase }; error?: string }) => {
+          if (!res.ok) {
+            setError(res.error ?? "Connection failed");
+            return;
+          }
+          setError(null);
+          socket.emit("sync_request");
+        }
+      );
+    };
+    socket.on("connect", onConnect);
+
     return () => {
       socket.off("new_question");
       socket.off("show_correct_answer");
@@ -104,6 +120,7 @@ export default function HostRoom({
       socket.off("stats_update");
       socket.off("players_update");
       socket.off("quiz_finished");
+      socket.off("connect", onConnect);
     };
   }, [code, hostToken]);
 
@@ -300,7 +317,11 @@ export default function HostRoom({
 
           {phase === "finished" && (
             <div className="card py-12 text-center animate-fadeIn">
-              <SplashWord text="GMIC" ms={2000} />
+              <SplashWord
+                text="GMIC"
+                ms={2000}
+                onDone={() => (window.location.href = `/leaderboard/${code}`)}
+              />
               <h2 className="mb-1 text-2xl font-extrabold">Match finished</h2>
               <p className="mb-8 text-sm text-muted">Final scores are recorded on the leaderboard.</p>
               <div className="mx-auto grid max-w-sm grid-cols-3 items-end gap-3">
