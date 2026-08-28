@@ -12,15 +12,15 @@ function OptionTile({
 }) {
   return (
     <div
-      className={`absolute flex items-center gap-3 rounded-2xl border border-line/15 bg-surface/70 px-4 py-4 shadow-lg shadow-black/20 ${className ?? ""}`}
+      className={`absolute flex items-center gap-2 rounded-xl border border-line/15 bg-surface/70 px-2.5 py-2.5 shadow-lg shadow-black/20 sm:gap-3 sm:rounded-2xl sm:px-4 sm:py-4 ${className ?? ""}`}
       style={style}
     >
-      <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/25 text-sm font-extrabold text-primary-light">
+      <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary/25 text-xs font-extrabold text-primary-light sm:h-9 sm:w-9 sm:text-sm">
         {letter}
       </span>
-      <span className="flex flex-col gap-1.5">
-        <span className="double-line block h-2 w-24 rounded bg-line/25" />
-        <span className="double-line block h-2 w-16 rounded bg-line/15" />
+      <span className="flex flex-col gap-1 sm:gap-1.5">
+        <span className="double-line block h-1.5 w-14 rounded bg-line/25 sm:h-2 sm:w-24" />
+        <span className="double-line block h-1.5 w-9 rounded bg-line/15 sm:h-2 sm:w-16" />
       </span>
     </div>
   );
@@ -28,15 +28,15 @@ function OptionTile({
 
 function PodiumMini() {
   return (
-    <div className="absolute bottom-[14%] right-[10%] hidden flex-row items-end gap-2 opacity-[0.14] xl:flex">
+    <div className="absolute bottom-[13%] right-[4%] flex flex-row items-end gap-1.5 opacity-[0.1] sm:gap-2 sm:opacity-[0.14]">
       {[
-        { h: "h-16", label: "2" },
-        { h: "h-24", label: "1" },
-        { h: "h-12", label: "3" },
+        { h: "h-8 sm:h-16", label: "2" },
+        { h: "h-12 sm:h-24", label: "1" },
+        { h: "h-6 sm:h-12", label: "3" },
       ].map((c, i) => (
-        <div key={i} className="flex flex-col items-center gap-1">
-          <span className="text-xs font-bold text-primary-light">{c.label}</span>
-          <div className={`w-10 rounded-t-lg bg-gradient-to-t from-primary/60 to-primary-light/70 ${c.h}`} />
+        <div key={i} className="flex flex-col items-center gap-0.5 sm:gap-1">
+          <span className="text-[9px] font-bold text-primary-light sm:text-xs">{c.label}</span>
+          <div className={`w-6 rounded-t-lg bg-gradient-to-t from-primary/60 to-primary-light/70 sm:w-10 ${c.h}`} />
         </div>
       ))}
     </div>
@@ -45,11 +45,11 @@ function PodiumMini() {
 
 function BarChartMini() {
   return (
-    <div className="absolute left-[4%] bottom-[24%] hidden flex-row items-end gap-2.5 opacity-[0.12] lg:flex">
-      {[46, 74, 30, 58].map((h, i) => (
+    <div className="absolute bottom-[26%] left-[4%] flex flex-row items-end gap-2 opacity-[0.1] sm:gap-2.5 sm:opacity-[0.12]">
+      {[22, 36, 14, 28].map((h, i) => (
         <div
           key={i}
-          className="w-6 rounded-t-md bg-gradient-to-t from-primary/40 to-primary-light/50"
+          className="w-3.5 rounded-t-md bg-gradient-to-t from-primary/40 to-primary-light/50 sm:w-6"
           style={{ height: `${h}px` }}
         />
       ))}
@@ -57,14 +57,19 @@ function BarChartMini() {
   );
 }
 
-function Sonar({ className, style }: { className?: string; style?: React.CSSProperties }) {
+function Sonar({ style }: { style?: React.CSSProperties }) {
   return (
     <>
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className={`sonar ${className ?? ""}`}
-          style={{ ...style, animationDelay: `${i * 1.5}s`, width: 220, height: 220 }}
+          className="sonar"
+          style={{
+            ...style,
+            animationDelay: `${i * 1.5}s`,
+            width: "clamp(120px, 32vw, 220px)",
+            height: "clamp(120px, 32vw, 220px)",
+          }}
         />
       ))}
     </>
@@ -73,17 +78,17 @@ function Sonar({ className, style }: { className?: string; style?: React.CSSProp
 
 function ScorePops() {
   const pops = [
-    { text: "+850", left: "16%", bottom: "26%", delay: "0s" },
-    { text: "+1000", left: "70%", bottom: "18%", delay: "2.4s" },
-    { text: "+640", left: "38%", bottom: "12%", delay: "4.8s" },
-    { text: "+1000", left: "86%", bottom: "30%", delay: "1.2s" },
+    { text: "+850", left: "12%", bottom: "24%", delay: "0s" },
+    { text: "+1000", left: "62%", bottom: "16%", delay: "2.4s" },
+    { text: "+640", left: "34%", bottom: "9%", delay: "4.8s" },
+    { text: "+1000", left: "78%", bottom: "32%", delay: "1.2s" },
   ];
   return (
     <>
       {pops.map((p, i) => (
         <span
           key={i}
-          className="score-pop text-xl"
+          className="score-pop text-base sm:text-xl"
           style={{ left: p.left, bottom: p.bottom, animationDelay: p.delay }}
         >
           {p.text}
@@ -95,10 +100,10 @@ function ScorePops() {
 
 function DriftDots() {
   const dots = [
-    { top: "22%", size: 7, delay: "0s", dur: "15s" },
-    { top: "48%", size: 5, delay: "4s", dur: "19s" },
-    { top: "72%", size: 8, delay: "8s", dur: "17s" },
-    { top: "34%", size: 4, delay: "11s", dur: "21s" },
+    { top: "22%", size: 5, delay: "0s", dur: "15s" },
+    { top: "48%", size: 4, delay: "4s", dur: "19s" },
+    { top: "72%", size: 6, delay: "8s", dur: "17s" },
+    { top: "34%", size: 3, delay: "11s", dur: "21s" },
   ];
   return (
     <>
@@ -124,21 +129,21 @@ export default function Backdrop() {
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       <div className="bg-grid absolute inset-0" />
 
-      {/* brand glows */}
-      <div className="absolute -top-44 right-[-8%] h-[520px] w-[520px] rounded-full bg-primary/25 blur-[150px]" />
-      <div className="absolute bottom-[-18%] left-[-10%] h-[560px] w-[560px] rounded-full bg-primary-light/15 blur-[170px]" />
-      <div className="absolute left-[30%] top-[35%] h-[300px] w-[300px] rounded-full bg-primary/10 blur-[120px]" />
+      {/* brand glows — lighter blur on mobile for performance */}
+      <div className="absolute -top-32 right-[-14%] h-[300px] w-[300px] rounded-full bg-primary/25 blur-[90px] md:-top-44 md:right-[-8%] md:h-[520px] md:w-[520px] md:blur-[150px]" />
+      <div className="absolute bottom-[-16%] left-[-16%] h-[320px] w-[320px] rounded-full bg-primary-light/15 blur-[100px] md:bottom-[-18%] md:left-[-10%] md:h-[560px] md:w-[560px] md:blur-[170px]" />
+      <div className="absolute left-[24%] top-[34%] h-[200px] w-[200px] rounded-full bg-primary/10 blur-[80px] md:left-[30%] md:top-[35%] md:h-[300px] md:w-[300px] md:blur-[120px]" />
 
       {/* giant "?" — quiz core symbol */}
-      <span className="absolute -right-6 top-[4%] select-none font-sans text-[280px] font-extrabold leading-none text-primary/12">
+      <span className="absolute -right-4 top-[3%] select-none font-sans text-[150px] font-extrabold leading-none text-primary/12 sm:text-[190px] md:-right-6 md:text-[280px]">
         ?
       </span>
-      <span className="absolute left-[2%] top-[46%] rotate-[-14deg] select-none font-sans text-[190px] font-extrabold leading-none text-primary-light/[0.07]">
+      <span className="absolute left-[-4%] top-[48%] rotate-[-14deg] select-none font-sans text-[110px] font-extrabold leading-none text-primary-light/[0.07] sm:text-[140px] md:left-[2%] md:text-[190px]">
         ?
       </span>
 
       {/* sonar pulses — seismic radar */}
-      <Sonar className="hidden md:block" style={{ left: "8%", top: "58%" }} />
+      <Sonar style={{ left: "6%", top: "56%" }} />
 
       {/* floating score pops */}
       <ScorePops />
@@ -148,7 +153,7 @@ export default function Backdrop() {
 
       {/* sweeping countdown ring */}
       <svg
-        className="floaty absolute left-[6%] top-[8%] h-44 w-44 opacity-[0.1]"
+        className="floaty absolute left-[5%] top-[6%] h-24 w-24 opacity-[0.1] sm:h-36 sm:w-36 md:left-[6%] md:top-[8%] md:h-44 md:w-44"
         viewBox="0 0 100 100"
         style={{ ["--r" as string]: "-6deg" }}
       >
@@ -167,26 +172,26 @@ export default function Backdrop() {
         />
       </svg>
 
-      {/* floating answer tiles */}
+      {/* floating answer tiles — 2 on mobile, 4 on large screens */}
       <OptionTile
         letter="A"
-        className="floaty hidden lg:flex"
-        style={{ top: "20%", left: "13%", "--r": "-5deg", animationDelay: "0s" } as React.CSSProperties}
+        className="floaty"
+        style={{ top: "17%", left: "4%", "--r": "-5deg", animationDelay: "0s" } as React.CSSProperties}
       />
       <OptionTile
         letter="B"
-        className="floaty hidden xl:flex"
+        className="floaty hidden md:flex"
         style={{ top: "62%", right: "7%", "--r": "4deg", animationDelay: "1.6s" } as React.CSSProperties}
       />
       <OptionTile
         letter="C"
-        className="floaty hidden xl:flex"
+        className="floaty hidden md:flex"
         style={{ top: "36%", right: "17%", "--r": "-3deg", animationDelay: "3.1s" } as React.CSSProperties}
       />
       <OptionTile
         letter="D"
-        className="floaty hidden lg:flex"
-        style={{ bottom: "9%", left: "22%", "--r": "6deg", animationDelay: "2.2s" } as React.CSSProperties}
+        className="floaty"
+        style={{ bottom: "22%", right: "4%", "--r": "6deg", animationDelay: "2.2s" } as React.CSSProperties}
       />
 
       {/* mini leaderboard podium */}
