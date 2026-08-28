@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Leaderboard from "@/components/Leaderboard";
+import SplashWord from "@/components/SplashWord";
 import { getSocket } from "@/lib/socket";
+import { drawResultCard } from "@/lib/result-card";
 import type { LeaderboardEntry } from "@/types/quiz";
 
 const fmt = (n: number) => n.toLocaleString("en-US");
@@ -12,6 +14,8 @@ export default function PublicLeaderboard({ code }: { code: string }) {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [title, setTitle] = useState<string | null>(null);
   const [ok, setOk] = useState<boolean | null>(null);
+  const [card, setCard] = useState<{ url: string; blob: Blob } | null>(null);
+  const [cardBusy, setCardBusy] = useState(false);
 
   useEffect(() => {
     const socket = getSocket();
@@ -32,6 +36,38 @@ export default function PublicLeaderboard({ code }: { code: string }) {
       socket.off("connect", watch);
     };
   }, [code]);
+
+  const meId =
+    typeof window !== "undefined" ? window.localStorage.getItem(`sq_pid_${code}`) : null;
+  const me = meId ? entries.find((e) => e.id === meId) ?? null : null;
+
+  async function downloadCard() {
+    if (!me || cardBusy) return;
+    setCardBusy(true);
+    try {
+      const blob = await drawResultCard({
+        name: window.localStorage.getItem("sq_name") || me.name,
+        rank: me.rank,
+        total: Math.max(me.rank, entries.length),
+        score: me.score,
+        code,
+      });
+      if (blob) {
+        setCard({ url: URL.createObjectURL(blob), blob });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `seismic-quiz-${code}.png`;
+        a.rel = "noopener";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setCardBusy(false);
+    }
+  }
 
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col px-6 py-10">
@@ -81,7 +117,27 @@ export default function PublicLeaderboard({ code }: { code: string }) {
               })}
             </div>
           )}
-          <Leaderboard entries={entries} />
+          <Leaderboard entries={entries} currentId={meId} />
+
+          {me && (
+            <section className="card mt-6 flex flex-col items-center gap-4 text-center">
+              <p className="text-sm text-muted">
+                <span className="font-bold text-white">{me.name}</span> — rank{" "}
+                <span className="font-extrabold text-primary-light">#{fmt(me.rank)}</span> ·{" "}
+                {fmt(me.score)} pts
+              </p>
+              <button onClick={downloadCard} disabled={cardBusy} className="btn-primary !px-8">
+                {cardBusy ? "Preparing…" : "Get my result card (PNG)"}
+              </button>
+              {card && (
+                <img
+                  src={card.url}
+                  alt="Your result card"
+                  className="w-full max-w-xs rounded-2xl border border-line/20 shadow-2xl shadow-black/50"
+                />
+              )}
+            </section>
+          )}
         </>
       )}
     </main>
